@@ -1,0 +1,157 @@
+name: string_utils
+version: "1.0"
+description: "String utility functions — a typical LLM code-generation target"
+timeout_seconds: 3.0
+tags: [string, utility]
+
+requirements:
+  - id: R1
+    description: "reverse_string reverses any non-empty string"
+    priority: must
+    test_ids: [T1, T2, T3]
+
+  - id: R2
+    description: "reverse_string handles empty string without error"
+    priority: must
+    test_ids: [T4]
+
+  - id: R3
+    description: "is_palindrome correctly identifies palindromes (case-insensitive)"
+    priority: must
+    test_ids: [T5, T6, T7]
+
+  - id: R4
+    description: "is_palindrome handles empty string (returns True)"
+    priority: should
+    test_ids: [T8]
+
+  - id: R5
+    description: "count_vowels counts vowels case-insensitively"
+    priority: must
+    test_ids: [T9, T10, T11]
+
+  - id: R6
+    description: "count_vowels returns 0 for strings with no vowels"
+    priority: should
+    test_ids: [T12]
+
+  - id: R7
+    description: "title_case converts first letter of each word to uppercase"
+    priority: must
+    test_ids: [T13, T14]
+
+  - id: R8
+    description: "title_case handles already-uppercase and mixed input"
+    priority: should
+    test_ids: [T15]
+
+tests:
+  - id: T1
+    description: "Reverse 'hello'"
+    function: reverse_string
+    args: ["hello"]
+    expected: "olleh"
+    requirement_ids: [R1]
+
+  - id: T2
+    description: "Reverse single character"
+    function: reverse_string
+    args: ["a"]
+    expected: "a"
+    requirement_ids: [R1]
+
+  - id: T3
+    description: "Reverse 'Python'"
+    function: reverse_string
+    args: ["Python"]
+    expected: "nohtyP"
+    requirement_ids: [R1]
+
+  - id: T4
+    description: "Reverse empty string"
+    function: reverse_string
+    args: [""]
+    expected: ""
+    requirement_ids: [R2]
+    tags: [edge, empty]
+
+  - id: T5
+    description: "racecar is a palindrome"
+    function: is_palindrome
+    args: ["racecar"]
+    expected: true
+    requirement_ids: [R3]
+
+  - id: T6
+    description: "hello is not a palindrome"
+    function: is_palindrome
+    args: ["hello"]
+    expected: false
+    requirement_ids: [R3]
+
+  - id: T7
+    description: "Palindrome check is case-insensitive (Racecar)"
+    function: is_palindrome
+    args: ["Racecar"]
+    expected: true
+    requirement_ids: [R3]
+    tags: [edge]
+
+  - id: T8
+    description: "Empty string is palindrome"
+    function: is_palindrome
+    args: [""]
+    expected: true
+    requirement_ids: [R4]
+    tags: [edge, empty]
+
+  - id: T9
+    description: "Count vowels in 'hello'"
+    function: count_vowels
+    args: ["hello"]
+    expected: 2
+    requirement_ids: [R5]
+
+  - id: T10
+    description: "Count vowels case-insensitively"
+    function: count_vowels
+    args: ["HELLO"]
+    expected: 2
+    requirement_ids: [R5]
+
+  - id: T11
+    description: "Count vowels in 'aeiou'"
+    function: count_vowels
+    args: ["aeiou"]
+    expected: 5
+    requirement_ids: [R5]
+
+  - id: T12
+    description: "No vowels in 'rhythm'"
+    function: count_vowels
+    args: ["rhythm"]
+    expected: 0
+    requirement_ids: [R6]
+    tags: [edge]
+
+  - id: T13
+    description: "title_case of 'hello world'"
+    function: title_case
+    args: ["hello world"]
+    expected: "Hello World"
+    requirement_ids: [R7]
+
+  - id: T14
+    description: "title_case of single word"
+    function: title_case
+    args: ["python"]
+    expected: "Python"
+    requirement_ids: [R7]
+
+  - id: T15
+    description: "title_case of already mixed-case string"
+    function: title_case
+    args: ["hELLO wORLD"]
+    expected: "Hello World"
+    requirement_ids: [R8]
+    tags: [edge]

@@ -1,0 +1,128 @@
+name: data_pipeline
+version: "1.0"
+description: "Data pipeline utility functions for tabular record processing"
+timeout_seconds: 5.0
+tags: [data, pipeline]
+
+requirements:
+  - id: R1
+    description: "normalise_records accepts a list of dicts and returns a list of dicts"
+    priority: must
+    test_ids: [T1, T2]
+
+  - id: R2
+    description: "normalise_records strips whitespace from string values"
+    priority: must
+    test_ids: [T3, T4]
+
+  - id: R3
+    description: "filter_by_field returns only records where field equals value"
+    priority: must
+    test_ids: [T5, T6]
+
+  - id: R4
+    description: "filter_by_field returns empty list when no records match"
+    priority: should
+    test_ids: [T7]
+
+  - id: R5
+    description: "compute_stats returns mean, median and std for a numeric field"
+    priority: must
+    test_ids: [T8, T9]
+
+  - id: R6
+    description: "compute_stats handles single-element list"
+    priority: should
+    test_ids: [T10]
+
+  - id: R7
+    description: "deduplicate removes records with duplicate key field values"
+    priority: must
+    test_ids: [T11, T12]
+
+tests:
+  - id: T1
+    description: "normalise_records returns list"
+    function: normalise_records
+    args: [[{"name": "Alice", "age": 30}]]
+    expected_type: list
+    requirement_ids: [R1]
+
+  - id: T2
+    description: "normalise_records preserves record count"
+    function: normalise_records
+    args: [[{"name": "Alice"}, {"name": "Bob"}]]
+    expected: [{"name": "Alice"}, {"name": "Bob"}]
+    requirement_ids: [R1]
+
+  - id: T3
+    description: "normalise_records strips leading/trailing whitespace"
+    function: normalise_records
+    args: [[{"name": "  Alice  ", "city": " London "}]]
+    expected: [{"name": "Alice", "city": "London"}]
+    requirement_ids: [R2]
+
+  - id: T4
+    description: "normalise_records strips nested whitespace in values"
+    function: normalise_records
+    args: [[{"key": " value "}]]
+    expected: [{"key": "value"}]
+    requirement_ids: [R2]
+
+  - id: T5
+    description: "filter_by_field returns matching records"
+    function: filter_by_field
+    args: [[{"role": "admin", "id": 1}, {"role": "user", "id": 2}, {"role": "admin", "id": 3}], "role", "admin"]
+    expected: [{"role": "admin", "id": 1}, {"role": "admin", "id": 3}]
+    requirement_ids: [R3]
+
+  - id: T6
+    description: "filter_by_field single match"
+    function: filter_by_field
+    args: [[{"x": 1}, {"x": 2}, {"x": 3}], "x", 2]
+    expected: [{"x": 2}]
+    requirement_ids: [R3]
+
+  - id: T7
+    description: "filter_by_field no match returns empty list"
+    function: filter_by_field
+    args: [[{"x": 1}, {"x": 2}], "x", 99]
+    expected: []
+    requirement_ids: [R4]
+    tags: [edge, empty]
+
+  - id: T8
+    description: "compute_stats basic mean/median/std"
+    function: compute_stats
+    args: [[{"v": 1}, {"v": 2}, {"v": 3}, {"v": 4}, {"v": 5}], "v"]
+    expected: {"mean": 3.0, "median": 3.0, "std": 1.4142135623730951}
+    requirement_ids: [R5]
+
+  - id: T9
+    description: "compute_stats with two equal values"
+    function: compute_stats
+    args: [[{"v": 5}, {"v": 5}], "v"]
+    expected: {"mean": 5.0, "median": 5.0, "std": 0.0}
+    requirement_ids: [R5]
+
+  - id: T10
+    description: "compute_stats single element"
+    function: compute_stats
+    args: [[{"v": 42}], "v"]
+    expected: {"mean": 42.0, "median": 42.0, "std": 0.0}
+    requirement_ids: [R6]
+    tags: [edge]
+
+  - id: T11
+    description: "deduplicate removes duplicate key values"
+    function: deduplicate
+    args: [[{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}, {"id": 1, "name": "Alice_dup"}], "id"]
+    expected: [{"id": 1, "name": "Alice"}, {"id": 2, "name": "Bob"}]
+    requirement_ids: [R7]
+
+  - id: T12
+    description: "deduplicate with no duplicates returns original list"
+    function: deduplicate
+    args: [[{"id": 1}, {"id": 2}, {"id": 3}], "id"]
+    expected: [{"id": 1}, {"id": 2}, {"id": 3}]
+    requirement_ids: [R7]
